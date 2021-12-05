@@ -1,0 +1,662 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<modification>
+	<name><![CDATA[MagicToolbox mod for OpenCart]]></name>
+        <version><![CDATA[4.5.32]]></version>
+        <code><![CDATA[Magic360-main]]></code>
+        <author><![CDATA[magictoolbox.com]]></author>
+        <link><![CDATA[http://magictoolbox.com]]></link>
+	<file path="catalog/controller/product/{product,category,manufacturer,search}.php">
+                <operation>
+                        <search><![CDATA[<?php]]></search>
+                        <add position="after"><![CDATA[
+                        
+    global $aFolder;
+    global $modulesPath;
+    
+    
+    
+    if (!defined('HTTP_ADMIN')) {
+        $root_dir = DIR_APPLICATION.'../';
+        $folder_contents = scandir($root_dir);
+                if (!(in_array('admin', $folder_contents) && file_exists($root_dir.'admin/config.php'))) {
+                        foreach ($folder_contents as $value) {
+                                if (is_dir($root_dir.$value) && $value != '.' && $value != '..'){
+                                        if (file_exists($root_dir.$value.'/config.php')) {
+                                                $admin_folder_name = $value;
+                                                continue;
+                                        }
+                                }
+                        }
+                }
+        if (isset($admin_folder_name)) {
+                define('HTTP_ADMIN',$admin_folder_name);
+        } else {
+                define('HTTP_ADMIN','admin');
+        }
+        
+    }
+    
+    $aFolder = preg_replace('/.*\/([^\/].*)\//is','$1',HTTP_ADMIN);
+    
+    if (version_compare(VERSION,'2.3','>=')) { //newer than 2.2.x
+        $modulesPath = 'extension/module';
+    } else {
+        $modulesPath = 'module';
+    }
+
+    include (preg_match("/components\/com_(ayelshop|aceshop|mijoshop)\/opencart\//ims",__FILE__,$matches)?'components/com_'.$matches[1].'/opencart/':'').$aFolder.'/controller/'.$modulesPath.'/magictoolbox-module.inc';]]>
+                    </add>
+                </operation>
+        </file>
+        
+        <file path="catalog/controller/common/column_left.php">
+                <operation>
+                  <search><![CDATA[module->getModule($part[1]);]]></search>
+                        <add position="after"><![CDATA[
+                          if ($setting_info) {
+                              $setting_info['position'] = 'column_left';
+                          }
+                          ]]></add>
+                </operation>
+                
+        </file>
+        
+        <file path="catalog/controller/common/column_left.php">
+                <operation>
+                    <search><![CDATA[if (isset($part[1]) && isset($setting[$part[1]])) {]]></search>
+                    <add position="after"><![CDATA[$setting[$part[1]]['position'] = 'column_left';]]></add>
+                </operation>
+        </file>
+        
+        <file path="catalog/controller/common/column_right.php">
+                <operation>
+                  <search><![CDATA[module->getModule($part[1]);]]></search>
+                        <add position="after"><![CDATA[
+                         if ($setting_info) {
+                            $setting_info['position'] = 'column_right';
+                         }
+                          ]]></add>
+                </operation>
+        </file>
+        
+        <file path="catalog/controller/common/column_right.php">
+                <operation>
+                    <search><![CDATA[if (isset($part[1]) && isset($setting[$part[1]])) {]]></search>
+                    <add position="after"><![CDATA[$setting[$part[1]]['position'] = 'column_right';]]></add>
+                </operation>
+        </file>
+        
+        <file path="catalog/controller/common/content_bottom.php">
+                <operation>
+                  <search><![CDATA[module->getModule($part[1]);]]></search>
+                        <add position="after"><![CDATA[
+                         if ($setting_info) {
+                            $setting_info['position'] = 'content_bottom';
+                         }
+                          ]]></add>
+                </operation>
+        </file>
+        
+        <file path="catalog/controller/common/content_bottom.php">
+                <operation>
+                    <search><![CDATA[if (isset($part[1]) && isset($setting[$part[1]])) {]]></search>
+                    <add position="after"><![CDATA[$setting[$part[1]]['position'] = 'content_bottom';]]></add>
+                </operation>
+        </file>
+        
+        <file path="catalog/controller/common/content_top.php">
+                <operation error="skip">
+                  <search><![CDATA[if (isset($part[1]) && isset($setting[$part[1]])) {]]></search>
+                        <add position="after"><![CDATA[$setting[$part[1]]['position'] = 'content_top';]]></add>
+                </operation>
+        </file>
+        
+        <file path="catalog/controller/common/content_top.php">
+                <operation error="skip">
+                  <search><![CDATA[module->getModule($part[1]);]]></search>
+                        <add position="after"><![CDATA[
+                           if ($setting_info) {
+                              $setting_info['position'] = 'content_top';
+                           }
+                          ]]></add>
+                </operation>
+        </file>
+
+        
+        <file path="catalog/controller/product/product.php">
+                <operation>
+                    <search regex="true" limit="2"><![CDATA[~(\$this->response->setOutput\()(\$this->load->view\(.*?product\/product.*?,\s+\$data\))(\);)~]]></search>
+                    <add position="replace"><![CDATA[$1magicRender($2,$this,'product',$product_info)$3]]></add>
+                </operation>
+                
+
+                <operation error="skip">
+                    <search><![CDATA[$results = array();]]></search>
+                    <add position="before"><![CDATA[
+                        $product_info['images'] = $results;
+                        ]]></add>
+                </operation>
+
+                <operation error="skip">
+                    <search><![CDATA[if ((float)$product_info['special']) {]]></search>
+                    <add position="before"><![CDATA[
+                        $product_info['thumb'] = $data['thumb'];
+                        if (!isset($product_info['images'])) {
+                            $product_info['images'] = $results;
+                        }
+                        $product_info['images_original'] = $data['images'];
+                        ]]></add>
+                </operation>
+
+                <operation error="skip">
+                    <search><![CDATA[if (!is_null($product_info['special']) && (float)$product_info['special'] >= 0) {]]></search>
+                    <add position="before"><![CDATA[
+                        $product_info['thumb'] = $data['thumb'];
+                        if (!isset($product_info['images'])) {
+                            $product_info['images'] = $results;
+                        }
+                        $product_info['images_original'] = $data['images'];
+                        ]]></add>
+                </operation>
+
+                <operation>
+                    <search><![CDATA[_image_popup_height'));]]></search>
+                    <add position="after"><![CDATA[
+                        $data['selector'] = $this->model_tool_image->resize($product_info['image'], $this->config->get((null !== $this->config->get('theme_'.$this->config->get('config_theme') . '_image_additional_width') ? 'theme_' : '') . $this->config->get('config_theme') . '_image_additional_width'), $this->config->get((null !== $this->config->get('theme_'.$this->config->get('config_theme') . '_image_additional_width') ? 'theme_' : '') . $this->config->get('config_theme') . '_image_additional_height'));
+                        $data['medium'] = $this->model_tool_image->resize($product_info['image'], $this->config->get((null !== $this->config->get('theme_'.$this->config->get('config_theme') . '_image_thumb_width') ? 'theme_' : '') . $this->config->get('config_theme') . '_image_thumb_width'), $this->config->get((null !== $this->config->get('theme_'.$this->config->get('config_theme') . '_image_thumb_width') ? 'theme_' : '') . $this->config->get('config_theme') . '_image_thumb_height'));
+                        if (isset($data['popup'])) {
+                            $product_info['popup'] = $data['popup'];
+                        } else if (isset($data['popup_fixed'])) {
+                            $product_info['popup'] = $data['popup_fixed'];
+                        } else {
+                            $product_info['popup'] = $data['popup'] = $this->model_tool_image->resize($product_info['image'], $this->config->get($this->config->get('config_theme') . '_image_popup_width'), $this->config->get($this->config->get('config_theme') . '_image_popup_height'));
+                        }
+                        $product_info['medium'] = $data['medium'];
+                        $product_info['selector'] = $data['selector'];
+                        if(isset($data['popup'])) $data['popup'] = $data['popup'].'" id="mainimage';]]></add>
+                </operation>
+
+                <operation>
+                    <search><![CDATA[$data['popup'] = '';]]></search>
+                    <add position="replace"><![CDATA[
+                        //$data['popup'] = '';
+
+                        $data['popup'] = $this->model_tool_image->resize('no_image.png', $this->config->get('theme_' . $this->config->get('config_theme') . '_image_popup_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_popup_height'));
+
+                        $data['selector'] = $this->model_tool_image->resize('no_image.png', $this->config->get((null !== $this->config->get('theme_'.$this->config->get('config_theme') . '_image_additional_width') ? 'theme_' : '') . $this->config->get('config_theme') . '_image_additional_width'), $this->config->get((null !== $this->config->get('theme_'.$this->config->get('config_theme') . '_image_additional_width') ? 'theme_' : '') . $this->config->get('config_theme') . '_image_additional_height'));
+                        $data['medium'] = $this->model_tool_image->resize('no_image.png', $this->config->get((null !== $this->config->get('theme_'.$this->config->get('config_theme') . '_image_thumb_width') ? 'theme_' : '') . $this->config->get('config_theme') . '_image_thumb_width'), $this->config->get((null !== $this->config->get('theme_'.$this->config->get('config_theme') . '_image_thumb_width') ? 'theme_' : '') . $this->config->get('config_theme') . '_image_thumb_height'));
+
+                        $product_info['popup'] = $data['popup'];
+                        $product_info['medium'] = $data['medium'];
+                        $product_info['selector'] = $data['selector'];
+                        if(isset($data['popup'])) $data['popup'] = $data['popup'].'" id="mainimage';]]></add>
+                </operation>
+                
+                <operation>
+                    <search><![CDATA[_image_popup_height')),]]></search>
+                    <add position="replace"><![CDATA[_image_popup_height')).'" id="selector',]]></add>
+                </operation>
+                    
+                <operation>
+                    <search><![CDATA['thumb' => $this->model_tool_image->resize($result['image'],]]></search>
+                    <add position="before"><![CDATA[
+                        'medium' => $this->model_tool_image->resize($result['image'], $this->config->get((null !== $this->config->get('theme_'.$this->config->get('config_theme') . '_image_thumb_width') ? 'theme_' : '') . $this->config->get('config_theme') . '_image_thumb_width'), $this->config->get((null !== $this->config->get('theme_'.$this->config->get('config_theme') . '_image_thumb_width') ? 'theme_' : '') . $this->config->get('config_theme') . '_image_thumb_height')),]]></add>
+                </operation>
+
+                
+        </file>
+        
+        
+        <file path="catalog/controller/product/category.php">
+                <operation>
+                    <search regex="true" limit="2"><![CDATA[~(\$this->response->setOutput\()(\$this->load->view\(.*?product\/category.*?,\s+\$data\))(\);)~]]></search>
+                    <add position="replace"><![CDATA[$1magicRender($2,$this,'category',(isset($results) ? $results : array()))$3]]></add>
+                </operation>
+                <operation>
+                    <search><![CDATA[_image_product_height'));]]></search>
+                    <add position="after"><![CDATA[
+                        $results[$result['product_id']]['popup'] = $this->model_tool_image->resize($result['image'], $this->config->get((null !== $this->config->get('theme_'.$this->config->get('config_theme') . '_image_popup_width') ? 'theme_' : '') . $this->config->get('config_theme') . '_image_popup_width'), $this->config->get((null !== $this->config->get('theme_'.$this->config->get('config_theme') . '_image_popup_width') ? 'theme_' : '') . $this->config->get('config_theme') . '_image_popup_height'));
+                        $image = $image .'" id="category_'.$result['product_id'].'"';]]>
+                    </add>
+
+                </operation>
+                
+                
+        </file>
+        
+        <file path="catalog/controller/product/manufacturer.php">
+                <operation>
+                    <search regex="true"><![CDATA[~(\$this->response->setOutput\()(\$this->load->view\(.*?product\/manufacturer_(?:info|list).*?,\s+\$data\))(\);)~]]></search>
+                    <add position="replace"><![CDATA[$1magicRender($2,$this,'manufacturers',(isset($results) ? $results : array()))$3]]></add>
+                </operation>
+                <operation>
+                    <search><![CDATA[_image_product_height'));]]></search>
+                    <add position="after"><![CDATA[
+                        $results[$result['product_id']]['popup'] = $this->model_tool_image->resize($result['image'], $this->config->get((null !== $this->config->get('theme_'.$this->config->get('config_theme') . '_image_popup_width') ? 'theme_' : '') . $this->config->get('config_theme') . '_image_popup_width'), $this->config->get((null !== $this->config->get('theme_'.$this->config->get('config_theme') . '_image_popup_width') ? 'theme_' : '') . $this->config->get('config_theme') . '_image_popup_height'));
+                        $image = $image .'" id="manufacturers_'.$result['product_id'].'"';]]>
+                    </add>
+
+                </operation>
+                
+                
+        </file>
+        
+        <file path="catalog/controller/product/search.php">
+                <operation>
+                    <search regex="true" limit="1"><![CDATA[~(\$this->response->setOutput\()(\$this->load->view\(.*?product\/search.*?,\s+\$data\))(\);)~]]></search>
+                    <add position="replace"><![CDATA[$1magicRender($2,$this,'search',(isset($results) ? $results : array()))$3]]></add>
+                </operation>
+                <operation>
+                    <search><![CDATA[_image_product_height'));]]></search>
+                    <add position="after"><![CDATA[
+                        $results[$result['product_id']]['popup'] = $this->model_tool_image->resize($result['image'], $this->config->get((null !== $this->config->get('theme_'.$this->config->get('config_theme') . '_image_popup_width') ? 'theme_' : '') . $this->config->get('config_theme') . '_image_popup_width'), $this->config->get((null !== $this->config->get('theme_'.$this->config->get('config_theme') . '_image_popup_width') ? 'theme_' : '') . $this->config->get('config_theme') . '_image_popup_height'));
+                        $image = $image .'" id="search_'.$result['product_id'].'"';]]>
+                    </add>
+                </operation>
+                
+        </file>
+        
+        <file path="catalog/controller/common/header.php">
+                <operation>
+                        <search><![CDATA[<?php]]></search>
+                        <add position="after"><![CDATA[
+    global $aFolder;
+    global $modulesPath;
+
+    
+    
+    if (!defined('HTTP_ADMIN')) {
+        $root_dir = DIR_APPLICATION.'../';
+        $folder_contents = scandir($root_dir);
+                if (!(in_array('admin', $folder_contents) && file_exists($root_dir.'admin/config.php'))) {
+                        foreach ($folder_contents as $value) {
+                                if (is_dir($root_dir.$value) && $value != '.' && $value != '..'){
+                                        if (file_exists($root_dir.$value.'/config.php')) {
+                                                $admin_folder_name = $value;
+                                                continue;
+                                        }
+                                }
+                        }
+                }
+        if (isset($admin_folder_name)) {
+                define('HTTP_ADMIN',$admin_folder_name);
+        } else {
+                define('HTTP_ADMIN','admin');
+        }
+    }
+    
+    $aFolder = preg_replace('/.*\/([^\/].*)\//is','$1',HTTP_ADMIN);
+    
+    if (version_compare(VERSION,'2.3','>=')) { //newer than 2.2.x
+        $modulesPath = 'extension/module';
+    } else {
+        $modulesPath = 'module';
+    }
+
+    include (preg_match("/components\/com_(ayelshop|aceshop|mijoshop)\/opencart\//ims",__FILE__,$matches)?'components/com_'.$matches[1].'/opencart/':'').$aFolder.'/controller/'.$modulesPath.'/magictoolbox-module.inc';
+    ]]></add>
+                </operation>
+                
+                <operation>
+                        <search><![CDATA[return]]></search>
+                        <add  position="replace"><![CDATA[
+                            $contents = ]]>
+                        </add>
+                </operation>
+       
+                <operation>
+                        <search><![CDATA[$this->load->view]]></search>
+                        <add position="after"><![CDATA[
+    return setModuleHeaders($contents, $this);
+    ]]></add>
+                </operation> 
+                
+        </file>
+        
+        <file path="catalog/controller/module/{latest,bestseller,special,featured}.php"> <!-- new opencart ocmod -->
+                <operation>
+                        <search><![CDATA[<?php]]></search>
+                        <add  position="after"><![CDATA[
+    global $aFolder;
+    global $modulesPath;
+    
+    
+    
+    if (!defined('HTTP_ADMIN')) {
+        $root_dir = DIR_APPLICATION.'../';
+        $folder_contents = scandir($root_dir);
+                if (!(in_array('admin', $folder_contents) && file_exists($root_dir.'admin/config.php'))) {
+                        foreach ($folder_contents as $value) {
+                                if (is_dir($root_dir.$value) && $value != '.' && $value != '..'){
+                                        if (file_exists($root_dir.$value.'/config.php')) {
+                                                $admin_folder_name = $value;
+                                                continue;
+                                        }
+                                }
+                        }
+                }
+        if (isset($admin_folder_name)) {
+                define('HTTP_ADMIN',$admin_folder_name);
+        } else {
+                define('HTTP_ADMIN','admin');
+        }
+        
+    }
+    
+    $aFolder = preg_replace('/.*\/([^\/].*)\//is','$1',HTTP_ADMIN);
+    
+    if (version_compare(VERSION,'2.3','>=')) { //newer than 2.2.x
+        $modulesPath = 'extension/module';
+    } else {
+        $modulesPath = 'module';
+    }
+
+    include (preg_match("/components\/com_(ayelshop|aceshop|mijoshop)\/opencart\//ims",__FILE__,$matches)?'components/com_'.$matches[1].'/opencart/':'').$aFolder.'/controller/'.$modulesPath.'/magictoolbox-module.inc';
+    ]]></add>
+                </operation>
+                
+                <operation>
+                        <search regex="true"><![CDATA[~return\s+(.*?);~]]></search>
+                        <add position="replace"><![CDATA[
+                            $contents = $1;
+                            global $aFolder;
+                            global $modulesPath;
+                            
+                            if (isset($GLOBALS['magictoolbox_modules'])) { 
+                                        global $tools;
+
+                                        foreach ($tools as $tool) {
+                                            if (isset($GLOBALS['magictoolbox_modules'][$tool])) {
+                                                $boxModule = $GLOBALS['magictoolbox_modules'][$tool];
+                                                if ($boxModule['status']) { //if module enabled
+                                                    if (!function_exists($tool)) if (!function_exists($tool)) include (preg_match("/components\/com_(ayelshop|aceshop|mijoshop)\/opencart\//ims",__FILE__,$matches)?'components/com_'.$matches[1].'/opencart/':'').$aFolder.'/controller/'.$modulesPath.'/'.$tool.'-opencart-module/module.php';
+                                                    $boxPath = (preg_match("/components\/com_(ayelshop|aceshop|mijoshop)\/opencart\//ims",__FILE__,$matches)?'components/com_'.$matches[1].'/opencart/':'').$aFolder.'/controller/'.$modulesPath.'/'.$tool.'-opencart-module/boxes.inc'; 
+                                                    if (file_exists($boxPath)) {
+                                                        include ($boxPath);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                            return $contents; 
+                            ]]>
+                        </add>
+                </operation>
+        
+        </file>
+        
+        <file path="catalog/controller/extension/module/{latest,bestseller,special,featured}.php"> <!-- new opencart ocmod -->
+                <operation>
+                        <search><![CDATA[<?php]]></search>
+                        <add  position="after"><![CDATA[
+    global $aFolder;
+    global $modulesPath;
+    
+    
+    if (!defined('HTTP_ADMIN')) {
+        $root_dir = DIR_APPLICATION.'../';
+        $folder_contents = scandir($root_dir);
+                if (!(in_array('admin', $folder_contents) && file_exists($root_dir.'admin/config.php'))) {
+                        foreach ($folder_contents as $value) {
+                                if (is_dir($root_dir.$value) && $value != '.' && $value != '..'){
+                                        if (file_exists($root_dir.$value.'/config.php')) {
+                                                $admin_folder_name = $value;
+                                                continue;
+                                        }
+                                }
+                        }
+                }
+        if (isset($admin_folder_name)) {
+                define('HTTP_ADMIN',$admin_folder_name);
+        } else {
+                define('HTTP_ADMIN','admin');
+        }  
+    }
+    
+    $aFolder = preg_replace('/.*\/([^\/].*)\//is','$1',HTTP_ADMIN);
+    
+    if (version_compare(VERSION,'2.3','>=')) { //newer than 2.2.x
+        $modulesPath = 'extension/module';
+    } else {
+        $modulesPath = 'module';
+    }
+    
+    
+    
+    include (preg_match("/components\/com_(ayelshop|aceshop|mijoshop)\/opencart\//ims",__FILE__,$matches)?'components/com_'.$matches[1].'/opencart/':'').$aFolder.'/controller/'.$modulesPath.'/magictoolbox-module.inc';
+    ]]></add>
+                </operation>
+                
+                <operation>
+                        <search regex="true"><![CDATA[~return\s+(.*?);~]]></search>
+                        <add position="replace"><![CDATA[
+                            $contents = $1;
+                            global $aFolder;
+                            global $modulesPath;
+                            
+                            if (isset($GLOBALS['magictoolbox_modules'])) { 
+                                        global $tools;
+
+                                        foreach ($tools as $tool) {
+                                            if (isset($GLOBALS['magictoolbox_modules'][$tool])) {
+                                                $boxModule = $GLOBALS['magictoolbox_modules'][$tool];
+                                                if ($boxModule['status']) { //if module enabled
+                                                    if (!function_exists($tool)) include (preg_match("/components\/com_(ayelshop|aceshop|mijoshop)\/opencart\//ims",__FILE__,$matches)?'components/com_'.$matches[1].'/opencart/':'').$aFolder.'/controller/'.$modulesPath.'/'.$tool.'-opencart-module/module.php';
+                                                    $boxPath = (preg_match("/components\/com_(ayelshop|aceshop|mijoshop)\/opencart\//ims",__FILE__,$matches)?'components/com_'.$matches[1].'/opencart/':'').$aFolder.'/controller/'.$modulesPath.'/'.$tool.'-opencart-module/boxes.inc'; 
+                                                    if (file_exists($boxPath)) {
+                                                        include ($boxPath);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                            return $contents; 
+                            ]]>
+                        </add>
+                </operation>
+        
+        </file>
+        
+        <file path="catalog/controller/module/latest.php,catalog/controller/module/bestseller.php,catalog/controller/module/special.php,catalog/controller/module/featured.php"> <!-- will work on old opencarts -->
+                <operation>
+                        <search><![CDATA[<?php]]></search>
+                        <add  position="after"><![CDATA[
+    global $aFolder;
+    global $modulesPath;
+    
+    
+    
+    if (!defined('HTTP_ADMIN')) {
+        $root_dir = DIR_APPLICATION.'../';
+        $folder_contents = scandir($root_dir);
+                if (!(in_array('admin', $folder_contents) && file_exists($root_dir.'admin/config.php'))) {
+                        foreach ($folder_contents as $value) {
+                                if (is_dir($root_dir.$value) && $value != '.' && $value != '..'){
+                                        if (file_exists($root_dir.$value.'/config.php')) {
+                                                $admin_folder_name = $value;
+                                                continue;
+                                        }
+                                }
+                        }
+                }
+        if (isset($admin_folder_name)) {
+                define('HTTP_ADMIN',$admin_folder_name);
+        } else {
+                define('HTTP_ADMIN','admin');
+        }
+        
+    }
+    
+    $aFolder = preg_replace('/.*\/([^\/].*)\//is','$1',HTTP_ADMIN);
+    
+    if (version_compare(VERSION,'2.3','>=')) { //newer than 2.2.x
+        $modulesPath = 'extension/module';
+    } else {
+        $modulesPath = 'module';
+    }
+    
+    include (preg_match("/components\/com_(ayelshop|aceshop|mijoshop)\/opencart\//ims",__FILE__,$matches)?'components/com_'.$matches[1].'/opencart/':'').$aFolder.'/controller/'.$modulesPath.'/magictoolbox-module.inc';
+    ]]></add>
+                </operation>
+                
+                <operation>
+                        <search regex="true"><![CDATA[~return\s+(.*?);~]]></search>
+                        <add position="replace"><![CDATA[
+                            $contents = $1;
+                            global $aFolder;
+                            global $modulesPath;
+                            
+                            if (isset($GLOBALS['magictoolbox_modules'])) { 
+                                        global $tools;
+
+                                        foreach ($tools as $tool) {
+                                            if (isset($GLOBALS['magictoolbox_modules'][$tool])) {
+                                                $boxModule = $GLOBALS['magictoolbox_modules'][$tool];
+                                                if ($boxModule['status']) { //if module enabled
+                                                    if (!function_exists($tool)) include (preg_match("/components\/com_(ayelshop|aceshop|mijoshop)\/opencart\//ims",__FILE__,$matches)?'components/com_'.$matches[1].'/opencart/':'').$aFolder.'/controller/'.$modulesPath.'/'.$tool.'-opencart-module/module.php';
+                                                    $boxPath = (preg_match("/components\/com_(ayelshop|aceshop|mijoshop)\/opencart\//ims",__FILE__,$matches)?'components/com_'.$matches[1].'/opencart/':'').$aFolder.'/controller/'.$modulesPath.'/'.$tool.'-opencart-module/boxes.inc'; 
+                                                    if (file_exists($boxPath)) {
+                                                        include ($boxPath);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                            return $contents; 
+                            ]]>
+                        </add>
+                </operation>
+                
+        
+        </file>
+<file path="catalog/controller/module/latest.php">
+                <operation>
+                        <search ><![CDATA[$image = $this->model_tool_image->resize($result['image'], $setting['width'], $setting['height']);]]></search>
+                        <add position="replace" ><![CDATA[
+                            $results[$result['product_id']]['popup'] = $this->model_tool_image->resize($result['image'], $this->config->get((null !== $this->config->get('theme_'.$this->config->get('config_theme') . '_image_popup_width') ? 'theme_' : '') . $this->config->get('config_theme') . '_image_popup_width'), $this->config->get((null !== $this->config->get('theme_'.$this->config->get('config_theme') . '_image_popup_width') ? 'theme_' : '') . $this->config->get('config_theme') . '_image_popup_height'));
+                            $image = $this->model_tool_image->resize($result['image'], $setting['width'], $setting['height']).'" id="latest_'.$result['product_id'].'"';]]></add>
+                </operation>
+        </file>
+        
+        <file path="catalog/controller/extension/module/latest.php">
+                <operation>
+                        <search ><![CDATA[$image = $this->model_tool_image->resize($result['image'], $setting['width'], $setting['height']);]]></search>
+                        <add position="replace" ><![CDATA[
+                            $results[$result['product_id']]['popup'] = $this->model_tool_image->resize($result['image'], $this->config->get((null !== $this->config->get('theme_'.$this->config->get('config_theme') . '_image_popup_width') ? 'theme_' : '') . $this->config->get('config_theme') . '_image_popup_width'), $this->config->get((null !== $this->config->get('theme_'.$this->config->get('config_theme') . '_image_popup_width') ? 'theme_' : '') . $this->config->get('config_theme') . '_image_popup_height'));
+                            $image = $this->model_tool_image->resize($result['image'], $setting['width'], $setting['height']).'" id="latest_'.$result['product_id'].'"';]]></add>
+                </operation>
+        </file>
+        
+        <file path="catalog/controller/module/bestseller.php"> 
+                <operation>
+                        <search ><![CDATA[$image = $this->model_tool_image->resize($result['image'], $setting['width'], $setting['height']);]]></search>
+                        <add position="replace" ><![CDATA[
+                            $results[$result['product_id']]['popup'] = $this->model_tool_image->resize($result['image'], $this->config->get((null !== $this->config->get('theme_'.$this->config->get('config_theme') . '_image_popup_width') ? 'theme_' : '') . $this->config->get('config_theme') . '_image_popup_width'), $this->config->get((null !== $this->config->get('theme_'.$this->config->get('config_theme') . '_image_popup_width') ? 'theme_' : '') . $this->config->get('config_theme') . '_image_popup_height'));
+                            $image = $this->model_tool_image->resize($result['image'], $setting['width'], $setting['height']).'" id="bestseller_'.$result['product_id'].'"';]]></add>
+                </operation>
+        </file>
+        
+        <file path="catalog/controller/extension/module/bestseller.php"> 
+                <operation>
+                        <search ><![CDATA[$image = $this->model_tool_image->resize($result['image'], $setting['width'], $setting['height']);]]></search>
+                        <add position="replace" ><![CDATA[
+                            $results[$result['product_id']]['popup'] = $this->model_tool_image->resize($result['image'], $this->config->get((null !== $this->config->get('theme_'.$this->config->get('config_theme') . '_image_popup_width') ? 'theme_' : '') . $this->config->get('config_theme') . '_image_popup_width'), $this->config->get((null !== $this->config->get('theme_'.$this->config->get('config_theme') . '_image_popup_width') ? 'theme_' : '') . $this->config->get('config_theme') . '_image_popup_height'));
+                            $image = $this->model_tool_image->resize($result['image'], $setting['width'], $setting['height']).'" id="bestseller_'.$result['product_id'].'"';]]></add>
+                </operation>
+        </file>
+        
+        <file path="catalog/controller/module/special.php"> 
+                <operation>
+                        <search ><![CDATA[$image = $this->model_tool_image->resize($result['image'], $setting['width'], $setting['height']);]]></search>
+                        <add position="replace" ><![CDATA[
+                            $results[$result['product_id']]['popup'] = $this->model_tool_image->resize($result['image'], $this->config->get((null !== $this->config->get('theme_'.$this->config->get('config_theme') . '_image_popup_width') ? 'theme_' : '') . $this->config->get('config_theme') . '_image_popup_width'), $this->config->get((null !== $this->config->get('theme_'.$this->config->get('config_theme') . '_image_popup_width') ? 'theme_' : '') . $this->config->get('config_theme') . '_image_popup_height'));
+                            $image = $this->model_tool_image->resize($result['image'], $setting['width'], $setting['height']).'" id="special_'.$result['product_id'].'"';]]></add>
+                </operation>
+        </file>
+        
+        <file path="catalog/controller/extension/module/special.php"> 
+                <operation>
+                        <search ><![CDATA[$image = $this->model_tool_image->resize($result['image'], $setting['width'], $setting['height']);]]></search>
+                        <add position="replace" ><![CDATA[
+                            $results[$result['product_id']]['popup'] = $this->model_tool_image->resize($result['image'], $this->config->get((null !== $this->config->get('theme_'.$this->config->get('config_theme') . '_image_popup_width') ? 'theme_' : '') . $this->config->get('config_theme') . '_image_popup_width'), $this->config->get((null !== $this->config->get('theme_'.$this->config->get('config_theme') . '_image_popup_width') ? 'theme_' : '') . $this->config->get('config_theme') . '_image_popup_height'));
+                            $image = $this->model_tool_image->resize($result['image'], $setting['width'], $setting['height']).'" id="special_'.$result['product_id'].'"';]]></add>
+                </operation>
+        </file>
+        
+        <file path="catalog/controller/module/featured.php">
+                <operation>
+                        <search ><![CDATA[if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {]]></search>
+                        <add position="before" ><![CDATA[
+                            $product_info['popup'] = $popup;
+                            $product_info['thumb'] = $image;
+                            $product_infos[] = $product_info;
+                        ]]></add>
+                </operation>
+                <operation>
+                        <search ><![CDATA[$image = $this->model_tool_image->resize($product_info['image'], $setting['width'], $setting['height']);]]></search>
+                        <add position="replace" ><![CDATA[
+                            $popup = $this->model_tool_image->resize($product_info['image'], $this->config->get((null !== $this->config->get('theme_'.$this->config->get('config_theme') . '_image_popup_width') ? 'theme_' : '') . $this->config->get('config_theme') . '_image_popup_width'), $this->config->get((null !== $this->config->get('theme_'.$this->config->get('config_theme') . '_image_popup_width') ? 'theme_' : '') . $this->config->get('config_theme') . '_image_popup_height'));
+                            $image = $this->model_tool_image->resize($product_info['image'], $setting['width'], $setting['height']).'" id="featured_'.$product_info['product_id'].'"';]]></add>
+                </operation>
+                <operation>
+                        <search ><![CDATA['name'        => $product_info['name'],]]></search>
+                        <add position="before" ><![CDATA[
+                                                'thumb'       => $image,
+                                                'popup'       => $popup,
+                            ]]>
+                        </add>
+                </operation>
+                
+        </file>
+        
+        <file path="catalog/controller/extension/module/featured.php">
+                <operation>
+                        <search ><![CDATA[if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {]]></search>
+                        <add position="before" ><![CDATA[
+                            $product_info['popup'] = $popup;
+                            $product_info['thumb'] = $image;
+                            $product_infos[] = $product_info;
+                        ]]></add>
+                </operation>
+                <operation>
+                        <search ><![CDATA[$image = $this->model_tool_image->resize($product_info['image'], $setting['width'], $setting['height']);]]></search>
+                        <add position="replace" ><![CDATA[
+                            $popup = $this->model_tool_image->resize($product_info['image'], $this->config->get((null !== $this->config->get('theme_'.$this->config->get('config_theme') . '_image_popup_width') ? 'theme_' : '') . $this->config->get('config_theme') . '_image_popup_width'), $this->config->get((null !== $this->config->get('theme_'.$this->config->get('config_theme') . '_image_popup_width') ? 'theme_' : '') . $this->config->get('config_theme') . '_image_popup_height'));
+                            $image = $this->model_tool_image->resize($product_info['image'], $setting['width'], $setting['height']).'" id="featured_'.$product_info['product_id'].'"';]]></add>
+                </operation>
+                <operation>
+                        <search ><![CDATA['name'        => $product_info['name'],]]></search>
+                        <add position="before" ><![CDATA[
+                                                'thumb'       => $image,
+                                                'popup'       => $popup,
+                            ]]></add>
+                </operation>
+                
+        </file>
+
+        
+        <file path="admin/controller/extension/extension/module.php">
+                <operation>
+                        <search ><![CDATA[$data['extensions'][] = array(]]></search>
+                        <add position="before" ><![CDATA[
+                                $duplicate = false;
+                                foreach ($data['extensions'] as $ext) { //check for the duplicate extensions
+                                    if ($ext['name'] == $this->language->get('heading_title') && strpos(strtolower($ext['name']),'magic') !== false) $duplicate = true; 
+                                }
+                                if (!$duplicate)
+                        ]]></add>
+                </operation>
+        </file>
+
+        <file path="catalog/controller/extension/optioncolorsize/optioncolorsize.php">
+                <operation error="skip">
+                        <search ><![CDATA[$json['html'] = $this->load->view('extension/optioncolor/optioncolor', $data,true);]]></search>
+                        <add position="after" ><![CDATA[
+                                $json['thumb'] = $data['thumb'];
+                                $json['popup'] = $data['popup'];
+                                $json['selectors'] = $data['images'];
+                        ]]></add>
+                </operation>
+        </file>
+        
+</modification>

@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<modification>
+	<name><![CDATA[MagicToolbox Magic360 mod for OpenCart]]></name>
+        <version><![CDATA[4.5.32]]></version>
+        <code><![CDATA[Magic360]]></code>
+        <author><![CDATA[magictoolbox.com]]></author>
+        <link><![CDATA[http://magictoolbox.com]]></link>
+        
+               <file path="admin/view/template/common/menu.tpl">
+                <operation>
+                        <search ><![CDATA[<?php if ($openbay_show_menu == 1) { ?>]]></search>
+                        <add position="before" ><![CDATA[
+                            <?php if ($module_installed) { ?>
+                                <li><a href="<?php echo  $magic360_module_link; ?>"><img style="width:32px; margin-bottom: -1px;" src="<?php echo (defined('JCART_COMPONENT_URL') ? JCART_COMPONENT_URL.'admin/' : HTTPS_SERVER); ?>controller/module/magic360-opencart-module/magic360.svg" />Magic360</a></li>
+                            <?php } ?>
+                        ]]></add>
+                </operation>
+        </file>
+        <file path="admin/controller/common/menu.php">
+                <operation>
+                        <search ><![CDATA[$data['openbay_show_menu'] = $this->config->get('openbaypro_menu');]]></search>
+                        <add position="after" ><![CDATA[
+                            
+                            $rez = $this->db->query("SELECT * FROM ".DB_PREFIX."extension WHERE code = 'magic360'");
+                            $data['module_installed'] = $rez->num_rows;
+                            
+                            $data['magic360_module_link'] = $this->url->link('module/magic360', 'token=' . $this->session->data['token'], true);
+                        ]]></add>
+                </operation>
+        </file>
+         <file path="admin/controller/common/column_left.php">
+            <operation>
+                        <search regex="true"><![CDATA[~if \(\$(extension|marketplace)\) {~]]></search>
+                        <add position="replace" ><![CDATA[
+                        if ($$1) {
+                            
+                        $rez = $this->db->query("SELECT * FROM ".DB_PREFIX."extension WHERE code = 'magic360'");
+                        if (version_compare(VERSION,'3','<')) {
+                            if ($this->user->hasPermission('access', 'extension/module/magic360') && $rez->num_rows) {
+                                $extension[] = array(
+                                        'name'     => '<img style="width:32px; margin-bottom: -1px;" src="'.(defined('JCART_COMPONENT_URL') ? JCART_COMPONENT_URL.'admin/' : HTTPS_SERVER).'controller/extension/module/magic360-opencart-module/magic360.svg" /> Magic 360',
+                                        'href'     => $this->url->link('extension/module/magic360', 'token=' . $this->session->data['token'], true),
+                                        'children' => array()           
+                                );
+                            }
+                        } else {
+                            if ($this->user->hasPermission('access', 'extension/module/magic360') && $rez->num_rows) {
+                                $marketplace[] = array(
+                                        'name'     => '<img style="width:32px; margin-bottom: -1px;" src="'.(defined('JCART_COMPONENT_URL') ? JCART_COMPONENT_URL.'admin/' : HTTPS_SERVER).'controller/extension/module/magic360-opencart-module/magic360.svg" /> Magic 360',
+                                        'href'     => $this->url->link('extension/module/magic360', 'user_token=' . $this->session->data['user_token'], true),
+                                        'children' => array()           
+                                );
+                            }
+                        }
+                        
+                        ]]></add>
+                </operation>
+        </file>
+        
+        <file path="admin/view/template/extension/extension/module.twig">
+                <operation>
+                        <search ><![CDATA[{% if extension.module %} <a href="{{extension.edit}}"  data-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary"><i class="fa fa-plus-circle"></i></a> {% else %} <a id="{{extension.module}}" href="{{ extension.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a> {% endif %}]]></search>
+                        <add position="replace" ><![CDATA[
+                            
+          {% if extension.code != 'magicslideshow' %}
+            {% if extension.module %} <a href="{{extension.edit}}"  data-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary"><i class="fa fa-plus-circle"></i></a> {% else %} <a id="{{extension.module}}" href="{{ extension.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a> {% endif %}
+          {% else %}
+            <a href="{{ extension.edit }}&module_id=new" data-toggle="tooltip" title="Add slideshow box" class="btn btn-primary"><i class="fa fa-plus-circle"></i></a> <a href="{{ extension.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a>
+          {% endif %}
+                        ]]></add>
+                </operation>
+        </file>
+
+        <file path="admin/view/template/extension/extension/module.tpl">
+                <operation>
+                        <search ><![CDATA[<?php if ($extension['module']) { ?>]]></search>
+                        <add position="replace" offset="4"><![CDATA[
+            <?php if ($extension['code'] !== 'magicslideshow') { ?>
+                <?php if ($extension['module']) { ?>
+                    <a href="<?php echo $extension['edit']; ?>" data-toggle="tooltip" title="<?php echo $button_add; ?>" class="btn btn-primary"><i class="fa fa-plus-circle"></i></a>
+                <?php } else { ?>
+                    <a href="<?php echo $extension['edit']; ?>" data-toggle="tooltip" title="<?php echo $button_edit; ?>" class="btn btn-primary"><i class="fa fa-pencil"></i></a>
+                <?php } ?>
+            <?php } else { ?> 
+                <a href="<?php echo $extension['edit']; ?>&module_id=new" data-toggle="tooltip" title="Add slideshow box" class="btn btn-primary"><i class="fa fa-plus-circle"></i></a> <a href="<?php echo $extension['edit']; ?>" data-toggle="tooltip" title="<?php echo $button_edit; ?>" class="btn btn-primary"><i class="fa fa-pencil"></i></a>
+            <?php } ?>]]></add>
+                </operation>
+        </file>
+        
+        <file path="admin/view/template/extension/extension/module.twig">
+                <operation>
+                        <search ><![CDATA[{% if extension.module %} <a href="{{ extension.edit }}" data-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary"><i class="fa fa-plus-circle"></i></a> {% else %} <a href="{{ extension.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a> {% endif %}]]></search>
+                        <add position="replace" ><![CDATA[
+                            
+          {% if extension.code != 'magicslideshow' %}
+            {% if extension.module %} <a href="{{extension.edit}}"  data-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary"><i class="fa fa-plus-circle"></i></a> {% else %} <a href="{{ extension.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a> {% endif %}
+          {% else %}
+            <a href="{{ extension.edit }}&module_id=new" data-toggle="tooltip" title="Add slideshow box" class="btn btn-primary"><i class="fa fa-plus-circle"></i></a> <a href="{{ extension.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a>
+          {% endif %}
+                        ]]></add>
+                </operation>
+        </file>
+        
+        <file path="admin/controller/extension/extension/module.php">
+                <operation>
+                        <search ><![CDATA[get('heading_title'),]]></search>
+                        <add position="after" ><![CDATA['code'      => $extension,]]></add>
+                </operation>
+        </file>
+        
+</modification>

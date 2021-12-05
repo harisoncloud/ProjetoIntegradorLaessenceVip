@@ -1,0 +1,32 @@
+﻿.product-gallery{
+						
+}
+img.gallery-main-image{
+	width:80%;	
+	margin-left:10%;
+	margin-right:10%;						
+}
+#gallery{
+	margin-left:10%;
+}
+.gallery-thumb-image{
+	width:100px;
+	height:auto;				
+}
+#product-product .nav-tabs{
+	margin-top:50px;			
+}
+#product-product .nav-tabs>li.active>a, #product-product .nav-tabs>li.active>a:focus, #product-product .nav-tabs>li.active>a:hover{
+	border:none;
+	background:#a99557;
+	color:#fff;				
+}
+#product-product .nav-tabs>li>a {
+    margin-right: 0px;
+    line-height: 1.42857143;
+    border: none;
+    border-radius: 0px;
+    background:#eddba2;
+    font-size:18px;
+    font-weight:300;
+}

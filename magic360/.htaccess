@@ -1,5 +1,0 @@
-#Allow Sameorigin .htaccess
-<IfModule mod_headers.c>
-Header always set X-Frame-Options SAMEORIGIN
-</IfModule>
-DirectoryIndex index.html
